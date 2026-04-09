@@ -1,2 +1,1048 @@
 # Sofia
 Sofias app
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DJ Booking Manager</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=DM+Sans:wght@300;400;500;600&display=swap');
+
+  :root {
+    --bg: #0a0a0a;
+    --surface: #111111;
+    --surface2: #1a1a1a;
+    --border: #2a2a2a;
+    --accent: #e8ff47;
+    --accent2: #ff6b35;
+    --text: #f0f0f0;
+    --muted: #666;
+    --done: #2a3d1a;
+    --done-text: #7ecb47;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    min-height: 100vh;
+  }
+
+  header {
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    padding: 20px 32px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+
+  .logo {
+    font-family: 'Space Mono', monospace;
+    font-size: 13px;
+    letter-spacing: 0.15em;
+    color: var(--accent);
+    text-transform: uppercase;
+  }
+
+  .header-actions {
+    display: flex;
+    gap: 10px;
+  }
+
+  .btn {
+    padding: 9px 18px;
+    border-radius: 6px;
+    border: none;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+
+  .btn-primary {
+    background: var(--accent);
+    color: #000;
+  }
+  .btn-primary:hover { background: #d4e83f; }
+
+  .btn-secondary {
+    background: transparent;
+    color: var(--text);
+    border: 1px solid var(--border);
+  }
+  .btn-secondary:hover { border-color: var(--accent); color: var(--accent); }
+
+  .btn-danger {
+    background: transparent;
+    color: #ff4444;
+    border: 1px solid #ff4444;
+  }
+  .btn-danger:hover { background: #ff4444; color: #fff; }
+
+  .container { max-width: 960px; margin: 0 auto; padding: 32px 24px; }
+
+  /* BOOKING SELECTOR */
+  .booking-bar {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 28px;
+    align-items: center;
+  }
+
+  select {
+    background: var(--surface);
+    color: var(--text);
+    border: 1px solid var(--border);
+    padding: 9px 14px;
+    border-radius: 6px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    flex: 1;
+    cursor: pointer;
+    outline: none;
+  }
+  select:focus { border-color: var(--accent); }
+
+  /* PROGRESS BAR */
+  .progress-section {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 20px 24px;
+    margin-bottom: 24px;
+  }
+
+  .progress-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+  }
+
+  .progress-label {
+    font-family: 'Space Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+
+  .progress-pct {
+    font-family: 'Space Mono', monospace;
+    font-size: 20px;
+    color: var(--accent);
+  }
+
+  .progress-track {
+    height: 6px;
+    background: var(--border);
+    border-radius: 99px;
+    overflow: hidden;
+  }
+
+  .progress-fill {
+    height: 100%;
+    background: var(--accent);
+    border-radius: 99px;
+    transition: width 0.4s ease;
+  }
+
+  /* SECTIONS */
+  .section {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    margin-bottom: 16px;
+    overflow: hidden;
+  }
+
+  .section-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 16px 20px;
+    cursor: pointer;
+    user-select: none;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .section-icon {
+    font-size: 16px;
+    width: 28px;
+    text-align: center;
+  }
+
+  .section-title {
+    font-family: 'Space Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    flex: 1;
+  }
+
+  .section-count {
+    font-size: 11px;
+    color: var(--muted);
+    font-family: 'Space Mono', monospace;
+  }
+
+  .section-body {
+    padding: 20px;
+    display: none;
+  }
+
+  .section.open .section-body { display: block; }
+
+  .section-toggle {
+    color: var(--muted);
+    font-size: 10px;
+    transition: transform 0.2s;
+  }
+  .section.open .section-toggle { transform: rotate(180deg); }
+
+  /* FIELDS */
+  .field-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+  }
+
+  .field-grid.three { grid-template-columns: 1fr 1fr 1fr; }
+  .field-grid.one { grid-template-columns: 1fr; }
+
+  .field {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .field label {
+    font-size: 11px;
+    color: var(--muted);
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    font-family: 'Space Mono', monospace;
+  }
+
+  .field input, .field textarea {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    color: var(--text);
+    padding: 9px 12px;
+    border-radius: 6px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    outline: none;
+    transition: border-color 0.15s;
+  }
+
+  .field input:focus, .field textarea:focus { border-color: var(--accent); }
+  .field textarea { resize: vertical; min-height: 72px; }
+
+  /* CHECKLIST ITEMS */
+  .checklist { display: flex; flex-direction: column; gap: 8px; margin-top: 6px; }
+
+  .check-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 14px;
+    border-radius: 7px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+
+  .check-item:hover { border-color: #444; }
+
+  .check-item.done {
+    background: var(--done);
+    border-color: #3a5a2a;
+  }
+
+  .check-item.done .check-label {
+    text-decoration: line-through;
+    color: var(--muted);
+  }
+
+  .check-box {
+    width: 18px;
+    height: 18px;
+    border-radius: 4px;
+    border: 2px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    transition: all 0.15s;
+    font-size: 11px;
+  }
+
+  .check-item.done .check-box {
+    background: var(--done-text);
+    border-color: var(--done-text);
+    color: #000;
+  }
+
+  .check-label { font-size: 13px; flex: 1; }
+
+  /* DIVIDER */
+  .divider {
+    height: 1px;
+    background: var(--border);
+    margin: 18px 0;
+  }
+
+  /* MODAL OVERLAY */
+  .modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.85);
+    z-index: 200;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+  }
+
+  .modal-overlay.open { display: flex; }
+
+  .modal {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    width: 100%;
+    max-width: 680px;
+    max-height: 80vh;
+    overflow-y: auto;
+    padding: 32px;
+  }
+
+  .modal h2 {
+    font-family: 'Space Mono', monospace;
+    font-size: 14px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 6px;
+  }
+
+  .modal .subtitle {
+    color: var(--muted);
+    font-size: 12px;
+    margin-bottom: 24px;
+  }
+
+  .summary-block {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 20px;
+    font-size: 13px;
+    line-height: 1.8;
+    white-space: pre-wrap;
+    font-family: 'DM Sans', sans-serif;
+    color: var(--text);
+    margin-bottom: 20px;
+  }
+
+  .modal-actions { display: flex; gap: 10px; flex-wrap: wrap; }
+
+  /* NEW BOOKING FORM */
+  .new-booking-form {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+
+  /* EMPTY STATE */
+  .empty-state {
+    text-align: center;
+    padding: 60px 20px;
+    color: var(--muted);
+  }
+
+  .empty-state h3 {
+    font-family: 'Space Mono', monospace;
+    font-size: 14px;
+    color: var(--text);
+    margin-bottom: 8px;
+  }
+
+  .tag {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-size: 10px;
+    font-family: 'Space Mono', monospace;
+    letter-spacing: 0.08em;
+  }
+
+  .tag-pending { background: #2a2000; color: #ffb700; border: 1px solid #3a3000; }
+  .tag-confirmed { background: var(--done); color: var(--done-text); border: 1px solid #3a5a2a; }
+
+  input[type="date"], input[type="time"] {
+    color-scheme: dark;
+  }
+
+  .section-header-right {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">◈ BOOKING MGR</div>
+  <div class="header-actions">
+    <button class="btn btn-secondary" onclick="openNewBooking()">+ New Booking</button>
+    <button class="btn btn-primary" onclick="generateSummary()">Generate Artist Brief</button>
+  </div>
+</header>
+
+<div class="container">
+
+  <!-- BOOKING SELECTOR -->
+  <div class="booking-bar">
+    <select id="bookingSelect" onchange="loadBooking()">
+      <option value="">— Select a booking —</option>
+    </select>
+    <button class="btn btn-danger" onclick="deleteBooking()" style="white-space:nowrap">Delete</button>
+  </div>
+
+  <!-- PROGRESS -->
+  <div class="progress-section" id="progressSection" style="display:none">
+    <div class="progress-header">
+      <span class="progress-label">Logistics Completion</span>
+      <span class="progress-pct" id="progressPct">0%</span>
+    </div>
+    <div class="progress-track">
+      <div class="progress-fill" id="progressFill" style="width:0%"></div>
+    </div>
+  </div>
+
+  <div id="bookingContent"></div>
+
+  <div id="emptyState" class="empty-state">
+    <h3>No booking selected</h3>
+    <p>Create a new booking or select one from the list above.</p>
+  </div>
+
+</div>
+
+<!-- SUMMARY MODAL -->
+<div class="modal-overlay" id="summaryModal">
+  <div class="modal">
+    <h2>Artist Brief</h2>
+    <p class="subtitle" id="summarySubtitle"></p>
+    <div class="summary-block" id="summaryContent"></div>
+    <div class="modal-actions">
+      <button class="btn btn-primary" onclick="copySummary()">Copy to Clipboard</button>
+      <button class="btn btn-secondary" onclick="closeSummary()">Close</button>
+    </div>
+  </div>
+</div>
+
+<!-- NEW BOOKING MODAL -->
+<div class="modal-overlay" id="newBookingModal">
+  <div class="modal">
+    <h2>New Booking</h2>
+    <p class="subtitle">Fill in the basics — you can add details after.</p>
+    <div class="new-booking-form">
+      <div class="field">
+        <label>Artist Name</label>
+        <input type="text" id="nb_artist" placeholder="e.g. DJ Shadow">
+      </div>
+      <div class="field-grid">
+        <div class="field">
+          <label>Event Name</label>
+          <input type="text" id="nb_event" placeholder="e.g. Club XS Saturday Night">
+        </div>
+        <div class="field">
+          <label>Performance Date</label>
+          <input type="date" id="nb_date">
+        </div>
+      </div>
+      <div class="field">
+        <label>Venue / City</label>
+        <input type="text" id="nb_venue" placeholder="e.g. XS Nightclub, Las Vegas">
+      </div>
+    </div>
+    <div style="display:flex;gap:10px;margin-top:24px">
+      <button class="btn btn-primary" onclick="createBooking()">Create Booking</button>
+      <button class="btn btn-secondary" onclick="closeNewBooking()">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ── STATE ──────────────────────────────────────────────────────────────────
+
+let bookings = JSON.parse(localStorage.getItem('dj_bookings') || '[]');
+let currentId = null;
+
+// ── INIT ───────────────────────────────────────────────────────────────────
+
+function init() {
+  renderBookingSelect();
+  if (bookings.length > 0) {
+    currentId = bookings[0].id;
+    document.getElementById('bookingSelect').value = currentId;
+    renderBooking();
+  }
+}
+
+function save() {
+  localStorage.setItem('dj_bookings', JSON.stringify(bookings));
+}
+
+function getCurrentBooking() {
+  return bookings.find(b => b.id === currentId);
+}
+
+// ── BOOKING SELECT ─────────────────────────────────────────────────────────
+
+function renderBookingSelect() {
+  const sel = document.getElementById('bookingSelect');
+  const prev = sel.value;
+  sel.innerHTML = '<option value="">— Select a booking —</option>';
+  bookings.forEach(b => {
+    const opt = document.createElement('option');
+    opt.value = b.id;
+    opt.textContent = `${b.artist} — ${b.event} (${b.date || 'No date'})`;
+    sel.appendChild(opt);
+  });
+  if (prev) sel.value = prev;
+}
+
+function loadBooking() {
+  currentId = document.getElementById('bookingSelect').value;
+  renderBooking();
+}
+
+// ── CREATE / DELETE ────────────────────────────────────────────────────────
+
+function openNewBooking() {
+  document.getElementById('newBookingModal').classList.add('open');
+}
+
+function closeNewBooking() {
+  document.getElementById('newBookingModal').classList.remove('open');
+}
+
+function createBooking() {
+  const artist = document.getElementById('nb_artist').value.trim();
+  const event  = document.getElementById('nb_event').value.trim();
+  const date   = document.getElementById('nb_date').value;
+  const venue  = document.getElementById('nb_venue').value.trim();
+  if (!artist) { alert('Artist name is required.'); return; }
+
+  const booking = {
+    id: Date.now().toString(),
+    artist, event, date, venue,
+    checks: {},
+    fields: {}
+  };
+
+  bookings.unshift(booking);
+  save();
+  renderBookingSelect();
+  currentId = booking.id;
+  document.getElementById('bookingSelect').value = currentId;
+  closeNewBooking();
+  renderBooking();
+
+  // clear inputs
+  ['nb_artist','nb_event','nb_date','nb_venue'].forEach(id => document.getElementById(id).value = '');
+}
+
+function deleteBooking() {
+  if (!currentId) return;
+  const b = getCurrentBooking();
+  if (!b) return;
+  if (!confirm(`Delete booking for ${b.artist}?`)) return;
+  bookings = bookings.filter(x => x.id !== currentId);
+  currentId = null;
+  save();
+  renderBookingSelect();
+  renderBooking();
+}
+
+// ── RENDER ─────────────────────────────────────────────────────────────────
+
+const SECTIONS = [
+  {
+    key: 'inbound_flight',
+    icon: '✈️',
+    title: 'Inbound Flight',
+    fields: [
+      { key: 'dep_airport', label: 'Departure Airport', type: 'text', placeholder: 'JFK – John F. Kennedy' },
+      { key: 'arr_airport', label: 'Arrival Airport', type: 'text', placeholder: 'LAS – Harry Reid' },
+      { key: 'flight_num', label: 'Flight Number', type: 'text', placeholder: 'AA 1234' },
+      { key: 'dep_time', label: 'Departure Time', type: 'datetime-local' },
+      { key: 'arr_time', label: 'Arrival Time', type: 'datetime-local' },
+      { key: 'airline', label: 'Airline', type: 'text', placeholder: 'American Airlines' },
+      { key: 'cabin', label: 'Cabin Class', type: 'text', placeholder: 'Business / First / Economy' },
+      { key: 'conf_code', label: 'Confirmation Code', type: 'text', placeholder: 'ABC123' },
+      { key: 'seat', label: 'Seat', type: 'text', placeholder: '3A' },
+      { key: 'terminal', label: 'Terminal / Gate', type: 'text', placeholder: 'Terminal B, Gate 22' },
+    ],
+    checks: [
+      'Ticket booked & confirmed',
+      'E-ticket sent to artist',
+      'Seat preference confirmed',
+      'Baggage allowance communicated',
+      'TSA PreCheck / Known Traveler number added',
+    ]
+  },
+  {
+    key: 'airport_pickup',
+    icon: '🚗',
+    title: 'Airport Pickup (Arrival)',
+    fields: [
+      { key: 'driver_name', label: 'Driver / Chauffeur Name', type: 'text', placeholder: 'Carlos Reyes' },
+      { key: 'driver_phone', label: 'Driver Phone', type: 'text', placeholder: '+1 (555) 000-0000' },
+      { key: 'car_model', label: 'Vehicle Make & Model', type: 'text', placeholder: 'Black Cadillac Escalade 2023' },
+      { key: 'plates', label: 'License Plates', type: 'text', placeholder: 'ABC-1234' },
+      { key: 'pickup_sign', label: 'Meetup / Sign Name', type: 'text', placeholder: 'Name shown on sign at arrivals' },
+      { key: 'pickup_location', label: 'Pickup Location', type: 'text', placeholder: 'Arrivals, Terminal B, curbside' },
+      { key: 'pickup_time', label: 'Pickup Time', type: 'datetime-local' },
+      { key: 'dropoff', label: 'Drop-off Destination', type: 'text', placeholder: 'Nobu Hotel, Las Vegas' },
+    ],
+    checks: [
+      'Driver booked & confirmed',
+      'Driver briefed with artist photo',
+      'Driver has artist phone number',
+      'Artist has driver phone number',
+      'Vehicle details sent to artist',
+      'Meet point communicated clearly',
+    ]
+  },
+  {
+    key: 'hotel',
+    icon: '🏨',
+    title: 'Hotel',
+    fields: [
+      { key: 'hotel_name', label: 'Hotel Name', type: 'text', placeholder: 'Nobu Hotel at Caesars Palace' },
+      { key: 'hotel_address', label: 'Address', type: 'text', placeholder: '3570 S Las Vegas Blvd, Las Vegas, NV 89109' },
+      { key: 'hotel_phone', label: 'Hotel Phone', type: 'text', placeholder: '+1 (702) 785-6677' },
+      { key: 'checkin_time', label: 'Check-In Date & Time', type: 'datetime-local' },
+      { key: 'checkout_time', label: 'Check-Out Date & Time', type: 'datetime-local' },
+      { key: 'conf_num', label: 'Confirmation Number', type: 'text', placeholder: 'RES-789456' },
+      { key: 'room_type', label: 'Room Type', type: 'text', placeholder: 'Penthouse Suite' },
+      { key: 'hotel_notes', label: 'Special Requests / Notes', type: 'textarea', placeholder: 'Early check-in requested. No smoking floor. Artist traveling with +1.' },
+    ],
+    checks: [
+      'Reservation confirmed',
+      'Confirmation number received',
+      'Early check-in requested (if needed)',
+      'Room type / preferences confirmed',
+      'Hotel contact saved',
+      'Hotel details sent to artist',
+    ]
+  },
+  {
+    key: 'show_day',
+    icon: '🎧',
+    title: 'Show Day — Venue & Performance',
+    fields: [
+      { key: 'venue_name', label: 'Venue Name', type: 'text', placeholder: 'XS Nightclub' },
+      { key: 'venue_address', label: 'Venue Address', type: 'text', placeholder: '3131 Las Vegas Blvd S, Las Vegas, NV 89109' },
+      { key: 'venue_contact', label: 'Venue Contact (Name)', type: 'text', placeholder: 'Jordan Smith – Talent Buyer' },
+      { key: 'venue_phone', label: 'Venue Contact Phone', type: 'text', placeholder: '+1 (702) 770-0097' },
+      { key: 'set_time', label: 'Set Time (Stage On)', type: 'datetime-local' },
+      { key: 'set_end', label: 'Set End Time', type: 'datetime-local' },
+      { key: 'set_length', label: 'Set Length', type: 'text', placeholder: '90 min' },
+      { key: 'soundcheck', label: 'Soundcheck Time', type: 'datetime-local' },
+      { key: 'load_in', label: 'Load-In / Arrival Time', type: 'datetime-local' },
+      { key: 'greenroom', label: 'Green Room / Hospitality Notes', type: 'textarea', placeholder: 'Rider requirements, food, beverages, backstage access details.' },
+      { key: 'equipment', label: 'Equipment / Tech Rider Notes', type: 'textarea', placeholder: 'CDJ-3000s, Allen & Heath mixer, booth monitor specs...' },
+      { key: 'payment_notes', label: 'Payment Notes', type: 'textarea', placeholder: 'Deposit received. Balance due night of show via wire. Contact: accounts@venue.com' },
+    ],
+    checks: [
+      'Contract signed by both parties',
+      'Deposit received',
+      'Venue sent full tech rider',
+      'Soundcheck time confirmed',
+      'Green room / hospitality confirmed',
+      'Backstage pass / credentials arranged',
+      'Photo/video policy confirmed with artist',
+      'Set time confirmed in writing',
+    ]
+  },
+  {
+    key: 'hotel_return',
+    icon: '🌙',
+    title: 'Post-Show Transport (Back to Hotel)',
+    fields: [
+      { key: 'postshow_driver', label: 'Driver Name', type: 'text', placeholder: 'Carlos Reyes' },
+      { key: 'postshow_driver_phone', label: 'Driver Phone', type: 'text', placeholder: '+1 (555) 000-0000' },
+      { key: 'postshow_car', label: 'Vehicle', type: 'text', placeholder: 'Black Cadillac Escalade' },
+      { key: 'postshow_plates', label: 'License Plates', type: 'text', placeholder: 'ABC-1234' },
+      { key: 'postshow_pickup_time', label: 'Estimated Pickup Time', type: 'time' },
+      { key: 'postshow_pickup_location', label: 'Pickup Point', type: 'text', placeholder: 'Venue back entrance / artist door' },
+      { key: 'postshow_dropoff', label: 'Drop-off', type: 'text', placeholder: 'Nobu Hotel' },
+    ],
+    checks: [
+      'Post-show transport booked',
+      'Driver on standby confirmed',
+      'Artist briefed on exit plan',
+    ]
+  },
+  {
+    key: 'return_flight',
+    icon: '🛫',
+    title: 'Return Flight',
+    fields: [
+      { key: 'ret_dep_airport', label: 'Departure Airport', type: 'text', placeholder: 'LAS – Harry Reid' },
+      { key: 'ret_arr_airport', label: 'Arrival Airport', type: 'text', placeholder: 'JFK – John F. Kennedy' },
+      { key: 'ret_flight_num', label: 'Flight Number', type: 'text', placeholder: 'AA 5678' },
+      { key: 'ret_dep_time', label: 'Departure Time', type: 'datetime-local' },
+      { key: 'ret_arr_time', label: 'Arrival Time (Est.)', type: 'datetime-local' },
+      { key: 'ret_conf', label: 'Confirmation Code', type: 'text', placeholder: 'XYZ456' },
+      { key: 'ret_seat', label: 'Seat', type: 'text', placeholder: '2C' },
+      { key: 'ret_terminal', label: 'Terminal / Gate', type: 'text', placeholder: 'Terminal 1, Gate D4' },
+    ],
+    checks: [
+      'Return ticket booked',
+      'E-ticket sent to artist',
+      'Checkout time aligns with flight',
+      'Return trip driver to airport booked',
+    ]
+  },
+  {
+    key: 'airport_sendoff',
+    icon: '🚕',
+    title: 'Airport Sendoff (Departure)',
+    fields: [
+      { key: 'dep_driver', label: 'Driver Name', type: 'text', placeholder: 'Maria Lopez' },
+      { key: 'dep_driver_phone', label: 'Driver Phone', type: 'text', placeholder: '+1 (555) 111-2222' },
+      { key: 'dep_car', label: 'Vehicle', type: 'text', placeholder: 'Black Suburban' },
+      { key: 'dep_plates', label: 'License Plates', type: 'text', placeholder: 'ZZZ-9999' },
+      { key: 'dep_pickup_time', label: 'Pickup Time from Hotel', type: 'datetime-local' },
+      { key: 'dep_pickup_location', label: 'Pickup Location', type: 'text', placeholder: 'Hotel main entrance' },
+    ],
+    checks: [
+      'Airport transport booked',
+      'Pickup time accounts for check-in + security',
+      'Artist briefed on departure pickup time',
+    ]
+  },
+  {
+    key: 'internal',
+    icon: '📋',
+    title: 'Internal Checklist',
+    fields: [
+      { key: 'fee', label: 'Artist Fee (Total)', type: 'text', placeholder: '$5,000' },
+      { key: 'deposit', label: 'Deposit Amount', type: 'text', placeholder: '$2,500' },
+      { key: 'deposit_date', label: 'Deposit Received Date', type: 'date' },
+      { key: 'balance_due', label: 'Balance Due', type: 'text', placeholder: '$2,500 — night of show' },
+      { key: 'manager_notes', label: 'Manager Notes (Internal)', type: 'textarea', placeholder: 'Internal notes, special requests, things to watch.' },
+    ],
+    checks: [
+      'Contract executed',
+      'Deposit received',
+      'Balance payment plan confirmed',
+      'Artist insurance / W9 on file',
+      'Emergency contact collected',
+      'Full itinerary sent to artist',
+      'Full itinerary sent to venue',
+      'Post-show debrief scheduled',
+    ]
+  }
+];
+
+function renderBooking() {
+  const content = document.getElementById('bookingContent');
+  const empty = document.getElementById('emptyState');
+  const progress = document.getElementById('progressSection');
+
+  if (!currentId) {
+    content.innerHTML = '';
+    empty.style.display = 'block';
+    progress.style.display = 'none';
+    return;
+  }
+
+  const b = getCurrentBooking();
+  if (!b) {
+    content.innerHTML = '';
+    empty.style.display = 'block';
+    progress.style.display = 'none';
+    return;
+  }
+
+  empty.style.display = 'none';
+  progress.style.display = 'block';
+
+  let html = '';
+
+  SECTIONS.forEach((sec, si) => {
+    const doneChecks = sec.checks.filter((_, ci) => b.checks[`${sec.key}_${ci}`]).length;
+    const totalChecks = sec.checks.length;
+    const allDone = doneChecks === totalChecks;
+
+    html += `
+    <div class="section open" id="sec_${sec.key}">
+      <div class="section-header" onclick="toggleSection('${sec.key}')">
+        <span class="section-icon">${sec.icon}</span>
+        <span class="section-title">${sec.title}</span>
+        <div class="section-header-right">
+          <span class="section-count">${doneChecks}/${totalChecks}</span>
+          ${allDone ? '<span class="tag tag-confirmed">✓ DONE</span>' : ''}
+          <span class="section-toggle">▼</span>
+        </div>
+      </div>
+      <div class="section-body">
+        <div class="field-grid${sec.fields.length === 1 ? ' one' : ''}">
+          ${sec.fields.map(f => {
+            const val = b.fields[`${sec.key}_${f.key}`] || '';
+            const isTextarea = f.type === 'textarea';
+            return `<div class="field${isTextarea ? ' one' : ''}">
+              <label>${f.label}</label>
+              ${isTextarea
+                ? `<textarea placeholder="${f.placeholder || ''}" onchange="setField('${sec.key}_${f.key}', this.value)">${val}</textarea>`
+                : `<input type="${f.type}" value="${val}" placeholder="${f.placeholder || ''}" onchange="setField('${sec.key}_${f.key}', this.value)">`
+              }
+            </div>`;
+          }).join('')}
+        </div>
+        <div class="divider"></div>
+        <div class="checklist">
+          ${sec.checks.map((c, ci) => {
+            const done = !!b.checks[`${sec.key}_${ci}`];
+            return `<div class="check-item${done ? ' done' : ''}" onclick="toggleCheck('${sec.key}_${ci}')">
+              <div class="check-box">${done ? '✓' : ''}</div>
+              <span class="check-label">${c}</span>
+            </div>`;
+          }).join('')}
+        </div>
+      </div>
+    </div>`;
+  });
+
+  content.innerHTML = html;
+  updateProgress();
+}
+
+function toggleSection(key) {
+  const el = document.getElementById(`sec_${key}`);
+  el.classList.toggle('open');
+}
+
+function setField(key, val) {
+  const b = getCurrentBooking();
+  if (!b) return;
+  b.fields[key] = val;
+  save();
+}
+
+function toggleCheck(key) {
+  const b = getCurrentBooking();
+  if (!b) return;
+  b.checks[key] = !b.checks[key];
+  save();
+  renderBooking();
+}
+
+function updateProgress() {
+  const b = getCurrentBooking();
+  if (!b) return;
+
+  let total = 0, done = 0;
+  SECTIONS.forEach(sec => {
+    sec.checks.forEach((_, ci) => {
+      total++;
+      if (b.checks[`${sec.key}_${ci}`]) done++;
+    });
+  });
+
+  const pct = total > 0 ? Math.round((done / total) * 100) : 0;
+  document.getElementById('progressPct').textContent = pct + '%';
+  document.getElementById('progressFill').style.width = pct + '%';
+}
+
+// ── SUMMARY ────────────────────────────────────────────────────────────────
+
+function f(b, key) {
+  return b.fields[key] || '—';
+}
+
+function fdt(b, key) {
+  const v = b.fields[key];
+  if (!v) return '—';
+  try {
+    return new Date(v).toLocaleString('en-US', {
+      weekday: 'short', month: 'short', day: 'numeric',
+      hour: 'numeric', minute: '2-digit', hour12: true
+    });
+  } catch { return v; }
+}
+
+function generateSummary() {
+  const b = getCurrentBooking();
+  if (!b) { alert('Select a booking first.'); return; }
+
+  const summary = `
+════════════════════════════════════════════
+  ARTIST ITINERARY — ${b.artist.toUpperCase()}
+  ${b.event} · ${b.venue}
+════════════════════════════════════════════
+
+✈️  INBOUND FLIGHT
+   ${f(b,'inbound_flight_airline')} ${f(b,'inbound_flight_flight_num')}
+   From:  ${f(b,'inbound_flight_dep_airport')}
+   To:    ${f(b,'inbound_flight_arr_airport')}
+   Departs: ${fdt(b,'inbound_flight_dep_time')}
+   Arrives: ${fdt(b,'inbound_flight_arr_time')}
+   Cabin: ${f(b,'inbound_flight_cabin')} | Seat: ${f(b,'inbound_flight_seat')}
+   Conf: ${f(b,'inbound_flight_conf_code')}
+   Terminal/Gate: ${f(b,'inbound_flight_terminal')}
+
+🚗  AIRPORT PICKUP (ARRIVAL)
+   Driver: ${f(b,'airport_pickup_driver_name')}
+   Phone:  ${f(b,'airport_pickup_driver_phone')}
+   Vehicle: ${f(b,'airport_pickup_car_model')} · Plates: ${f(b,'airport_pickup_plates')}
+   Pickup: ${fdt(b,'airport_pickup_pickup_time')}
+   Meet at: ${f(b,'airport_pickup_pickup_location')}
+   Sign/Name: ${f(b,'airport_pickup_pickup_sign')}
+   Drop-off: ${f(b,'airport_pickup_dropoff')}
+
+🏨  HOTEL
+   ${f(b,'hotel_hotel_name')}
+   ${f(b,'hotel_hotel_address')}
+   Phone: ${f(b,'hotel_hotel_phone')}
+   Check-In:  ${fdt(b,'hotel_checkin_time')}
+   Check-Out: ${fdt(b,'hotel_checkout_time')}
+   Room Type: ${f(b,'hotel_room_type')}
+   Confirmation #: ${f(b,'hotel_conf_num')}
+   Notes: ${f(b,'hotel_hotel_notes')}
+
+🎧  SHOW DAY
+   Venue: ${f(b,'show_day_venue_name')}
+   Address: ${f(b,'show_day_venue_address')}
+   Venue Contact: ${f(b,'show_day_venue_contact')} · ${f(b,'show_day_venue_phone')}
+   Load-In / Arrive: ${fdt(b,'show_day_load_in')}
+   Soundcheck: ${fdt(b,'show_day_soundcheck')}
+   Set Time: ${fdt(b,'show_day_set_time')} → ${fdt(b,'show_day_set_end')} (${f(b,'show_day_set_length')})
+   Green Room: ${f(b,'show_day_greenroom')}
+   Equipment: ${f(b,'show_day_equipment')}
+
+🌙  POST-SHOW TRANSPORT (BACK TO HOTEL)
+   Driver: ${f(b,'hotel_return_postshow_driver')}
+   Phone:  ${f(b,'hotel_return_postshow_driver_phone')}
+   Vehicle: ${f(b,'hotel_return_postshow_car')} · Plates: ${f(b,'hotel_return_postshow_plates')}
+   Est. Pickup: ${f(b,'hotel_return_postshow_pickup_time')}
+   Pickup at: ${f(b,'hotel_return_postshow_pickup_location')}
+   Drop-off: ${f(b,'hotel_return_postshow_dropoff')}
+
+🛫  RETURN FLIGHT
+   ${f(b,'return_flight_ret_flight_num')}
+   From:  ${f(b,'return_flight_ret_dep_airport')}
+   To:    ${f(b,'return_flight_ret_arr_airport')}
+   Departs: ${fdt(b,'return_flight_ret_dep_time')}
+   Arrives: ${fdt(b,'return_flight_ret_arr_time')}
+   Seat: ${f(b,'return_flight_ret_seat')}
+   Conf: ${f(b,'return_flight_ret_conf')}
+   Terminal/Gate: ${f(b,'return_flight_ret_terminal')}
+
+🚕  AIRPORT SENDOFF (DEPARTURE)
+   Driver: ${f(b,'airport_sendoff_dep_driver')}
+   Phone:  ${f(b,'airport_sendoff_dep_driver_phone')}
+   Vehicle: ${f(b,'airport_sendoff_dep_car')} · Plates: ${f(b,'airport_sendoff_dep_plates')}
+   Pickup from Hotel: ${fdt(b,'airport_sendoff_dep_pickup_time')}
+   Pickup Location: ${f(b,'airport_sendoff_dep_pickup_location')}
+
+════════════════════════════════════════════
+  Questions? Contact your manager directly.
+════════════════════════════════════════════
+`.trim();
+
+  document.getElementById('summarySubtitle').textContent = `${b.artist} — ${b.event} · ${b.date || ''}`;
+  document.getElementById('summaryContent').textContent = summary;
+  document.getElementById('summaryModal').classList.add('open');
+}
+
+function closeSummary() {
+  document.getElementById('summaryModal').classList.remove('open');
+}
+
+function copySummary() {
+  const text = document.getElementById('summaryContent').textContent;
+  navigator.clipboard.writeText(text).then(() => {
+    const btn = event.target;
+    btn.textContent = 'Copied!';
+    setTimeout(() => btn.textContent = 'Copy to Clipboard', 2000);
+  });
+}
+
+// ── SEED DATA ──────────────────────────────────────────────────────────────
+
+if (bookings.length === 0) {
+  bookings = [{
+    id: 'demo1',
+    artist: 'DJ Phantom',
+    event: 'XS Saturday Night',
+    date: '2025-08-16',
+    venue: 'XS Nightclub, Las Vegas',
+    checks: {
+      'inbound_flight_0': true,
+      'inbound_flight_1': true,
+      'airport_pickup_0': true,
+      'hotel_0': true,
+      'hotel_1': true,
+    },
+    fields: {
+      'inbound_flight_airline': 'American Airlines',
+      'inbound_flight_flight_num': 'AA 1234',
+      'inbound_flight_dep_airport': 'JFK – John F. Kennedy',
+      'inbound_flight_arr_airport': 'LAS – Harry Reid International',
+      'inbound_flight_dep_time': '2025-08-16T09:00',
+      'inbound_flight_arr_time': '2025-08-16T12:30',
+      'inbound_flight_cabin': 'First Class',
+      'inbound_flight_conf_code': 'PH4821',
+      'inbound_flight_seat': '2A',
+      'inbound_flight_terminal': 'Terminal B, Gate 22',
+      'airport_pickup_driver_name': 'Carlos Reyes',
+      'airport_pickup_driver_phone': '+1 (702) 555-0190',
+      'airport_pickup_car_model': 'Black Cadillac Escalade 2023',
+      'airport_pickup_plates': 'NV · ABC-1234',
+      'airport_pickup_pickup_time': '2025-08-16T12:45',
+      'airport_pickup_pickup_location': 'Arrivals, Terminal B, Curbside',
+      'airport_pickup_pickup_sign': 'DJ PHANTOM',
+      'airport_pickup_dropoff': 'Nobu Hotel at Caesars Palace',
+      'hotel_hotel_name': 'Nobu Hotel at Caesars Palace',
+      'hotel_hotel_address': '3570 S Las Vegas Blvd, Las Vegas, NV 89109',
+      'hotel_hotel_phone': '+1 (702) 785-6677',
+      'hotel_checkin_time': '2025-08-16T15:00',
+      'hotel_checkout_time': '2025-08-17T12:00',
+      'hotel_conf_num': 'RES-789456',
+      'hotel_room_type': 'Penthouse Suite',
+      'show_day_venue_name': 'XS Nightclub',
+      'show_day_venue_address': '3131 Las Vegas Blvd S, Las Vegas, NV 89109',
+      'show_day_set_time': '2025-08-17T01:00',
+      'show_day_set_end': '2025-08-17T02:30',
+      'show_day_set_length': '90 min',
+      'show_day_soundcheck': '2025-08-16T22:00',
+      'show_day_load_in': '2025-08-16T21:30',
+    }
+  }];
+  save();
+}
+
+init();
+</script>
+</body>
+</html>
