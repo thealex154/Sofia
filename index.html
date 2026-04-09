@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DJ Booking Manager</title>
+    <link rel="stylesheet" href="styles.css">
+    <script src="script.js" defer></script>
+</head>
+<body>
+    <header>
+        <h1>DJ Booking Manager</h1>
+    </header>
+    <div class="container">
+        <section id="booking-manager">
+            <h2>Book a DJ</h2>
+            <form id="booking-form">
+                <label for="client-name">Client Name:</label>
+                <input type="text" id="client-name" required>
+                <label for="event-date">Event Date:</label>
+                <input type="date" id="event-date" required>
+                <label for="event-time">Event Time:</label>
+                <input type="time" id="event-time" required>
+                <button type="submit">Submit Booking</button>
+            </form>
+            <div id="summary"></div>
+        </section>
+        <!-- Modals and other sections go here -->
+    </div>
+    <script>
+        // SECTIONS configuration
+        const SECTIONS = {
+            bookingManager: '#booking-manager',
+            summary: '#summary'
+        };
+
+        // Render booking function
+        function renderBooking(booking) {
+            const summaryDiv = document.getElementById('summary');
+            const bookingEntry = document.createElement('div');
+            bookingEntry.innerHTML = `<p>${booking.clientName} - ${booking.eventDate} at ${booking.eventTime}</p>`;
+            summaryDiv.appendChild(bookingEntry);
+        }
+
+        // Create booking function
+        function createBooking(event) {
+            event.preventDefault();
+            const clientName = document.getElementById('client-name').value;
+            const eventDate = document.getElementById('event-date').value;
+            const eventTime = document.getElementById('event-time').value;
+            const booking = { clientName, eventDate, eventTime };
+            renderBooking(booking);
+            // Clear the form
+            document.getElementById('booking-form').reset();
+        }
+
+        // Generate summary function
+        function generateSummary(bookings) {
+            bookings.forEach(renderBooking);
+        }
+
+        // Seed data with demo bookings
+        const demoBookings = [
+            { clientName: 'Alice', eventDate: '2026-05-10', eventTime: '18:00' },
+            { clientName: 'Bob', eventDate: '2026-06-12', eventTime: '19:30' }
+        ];
+        generateSummary(demoBookings);
+
+        // Add event listener
+        document.getElementById('booking-form').addEventListener('submit', createBooking);
+    </script>
+</body>
+</html>
